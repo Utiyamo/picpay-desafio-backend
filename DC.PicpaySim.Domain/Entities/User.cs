@@ -20,7 +20,7 @@ namespace DC.PicpaySim.Domain.Entities
 
         public User(string name, string document, string email, string password, ETypeUser typeUser)
         {
-            this.ExternalId = new Guid();
+            this.ExternalId = Guid.NewGuid();
             this.NomeCompleto = name;
             this.Documento = document;
             this.Email = email;

@@ -1,4 +1,9 @@
+using DC.PicpaySim.Domain.Commands;
+using DC.PicpaySim.Infrastructure.Repositories;
 using DC.PicpaySim.Infrastructure.Repositories.Interfaces;
+using FluentValidation;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DC.PicpaySim.API.Controllers
@@ -7,29 +12,59 @@ namespace DC.PicpaySim.API.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IMediator _mediator;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IMediator mediator)
         {
-            _userRepository = userRepository;
+            _mediator = mediator;
         }
 
+        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] Guid id)
         {
             try
             {
-                var result = await _userRepository.FindById(0);
-                if(result == null)
-                    return NotFound();
+                var userQuery = new GetUserQuery(id);
 
-                return Ok();
+                var result = await _mediator.Send(userQuery);
+                if (!result.isSuccess)
+                {
+                    if (result.Status == 404)
+                        return NotFound();
+                    else
+                        return StatusCode(result.Status, result);
+                }
+
+                return Ok(result.Data);
             }
             catch(Exception ex)
             {
                 return StatusCode(500, ex);
             }
-            
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CreateUserCommand command)
+        {
+            try
+            {
+                var resultNewUser = await _mediator.Send(command);
+                if (!resultNewUser.isSuccess)
+                {
+                    if (resultNewUser.Status == 404)
+                        return NotFound();
+                    else
+                        return StatusCode(resultNewUser.Status, resultNewUser);
+                }
+
+                return Created("User created sucessfully", resultNewUser.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
     }
 }

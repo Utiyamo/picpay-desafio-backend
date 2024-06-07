@@ -8,7 +8,7 @@ namespace DC.PicpaySim.Domain.Enums
 {
     public enum ETypeUser
     {
-        client=0,
+        client=1,
         shopkeeper
     }
 }
