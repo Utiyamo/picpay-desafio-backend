@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Zaq12wsX@!
+    ports:
+      - "1433:1433"
+
+  myapp:
+    image: myappimage
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=Picpay;User ID=sa;Password=Zaq12wsX@!;Integrated Security=false;TrustServerCertificate=true
