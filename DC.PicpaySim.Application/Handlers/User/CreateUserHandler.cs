@@ -49,8 +49,9 @@ namespace DC.PicpaySim.Application.Handlers.User
                 if(user != null)
                     return BaseResponse<UserDTO>.Error(400, $"User arready exists.");
 
-                var newUser = new Domain.Entities.User(command.Name, command.Password, command.Email, command.Document, command.TypeUser);
+                var newUser = new Domain.Entities.User(command.Name, command.Document, command.Email, command.Password, command.TypeUser);
                 newUser = await _userRepository.Create(newUser);
+                await _userRepository.Commit();
                  
                 if (newUser.Id == 0)
                     return BaseResponse<UserDTO>.Error(500, $"Internal error to create User.");
@@ -60,6 +61,7 @@ namespace DC.PicpaySim.Application.Handlers.User
             }
             catch (Exception ex)
             {
+                await _userRepository.Rollback();
                 throw ex;
             }
         }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DC.PicpaySim.Infrastructure.Repositories.Abstractions
 {
-    public abstract class BaseRepository<T, TKey>  where T : class
+    public abstract class BaseRepository<T, TKey> where T : class
     {
         protected readonly DatabaseContext _dbContext;
         protected readonly DbSet<T> _dbSet;
@@ -20,12 +20,53 @@ namespace DC.PicpaySim.Infrastructure.Repositories.Abstractions
             _dbSet = dbContext.Set<T>();
         }
 
+        public async Task Commit()
+        {
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task Rollback()
+        {
+            try
+            {
+                foreach (var entry in _dbContext.ChangeTracker.Entries())
+                {
+                    switch (entry.State)
+                    {
+                        case EntityState.Added:
+                            entry.State = EntityState.Detached;
+                            break;
+
+                        case EntityState.Modified:
+                            entry.State = EntityState.Unchanged;
+                            break;
+
+                        case EntityState.Deleted:
+                            entry.State = EntityState.Unchanged;
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
+        }
+
         public async Task<T> Create(T entity)
         {
             try
             {
                 _dbSet.Add(entity);
-                await _dbContext.SaveChangesAsync();
 
                 return entity;
             }
@@ -44,7 +85,6 @@ namespace DC.PicpaySim.Infrastructure.Repositories.Abstractions
                     throw new Exception($"Entity with ID {id} not found.");
 
                 _dbSet.Remove(entity);
-                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -98,7 +138,6 @@ namespace DC.PicpaySim.Infrastructure.Repositories.Abstractions
             try
             {
                 _dbSet.Update(entity);
-                await _dbContext.SaveChangesAsync();
 
                 return entity;
             }

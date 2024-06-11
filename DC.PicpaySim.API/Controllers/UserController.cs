@@ -20,23 +20,48 @@ namespace DC.PicpaySim.API.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] Guid id)
+        [HttpGet("/User/{id}")]
+        public async Task<IActionResult> Get(Guid id, [FromQuery] String? expand)
         {
             try
             {
-                var userQuery = new GetUserQuery(id);
-
-                var result = await _mediator.Send(userQuery);
-                if (!result.isSuccess)
+                if (String.IsNullOrEmpty(expand.Trim()))
                 {
-                    if (result.Status == 404)
-                        return NotFound();
-                    else
-                        return StatusCode(result.Status, result);
-                }
+                    var userQuery = new GetUserQuery(id);
 
-                return Ok(result.Data);
+                    var result = await _mediator.Send(userQuery);
+                    if (!result.isSuccess)
+                    {
+                        if (result.Status == 404)
+                            return NotFound();
+                        else
+                            return StatusCode(result.Status, result);
+                    }
+
+                    return Ok(result.Data);
+                }
+                else
+                {
+                    switch(expand.Trim().ToUpper())
+                    {
+                        case "WALLET":
+                            var getWalletByUserQuery = new GetWalletByUserQuery(id);
+                            var resultWithWallet = await _mediator.Send(getWalletByUserQuery);
+                            if (!resultWithWallet.isSuccess)
+                            {
+                                if (resultWithWallet.Status == 404)
+                                    return NotFound();
+                                else
+                                    return StatusCode(resultWithWallet.Status, resultWithWallet);
+                            }
+
+                            return Ok(resultWithWallet.Data);
+
+                        default:
+                            return BadRequest("Expanded info not mapped.");
+                    }
+                }
+                
             }
             catch(Exception ex)
             {

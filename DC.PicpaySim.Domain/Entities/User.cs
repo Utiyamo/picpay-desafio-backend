@@ -16,7 +16,12 @@ namespace DC.PicpaySim.Domain.Entities
         public string Senha { get; set; }
         public ETypeUser TypeUser { get; set; }
 
-        public User() { }
+        public virtual IEnumerable<UserWallet> Wallets { get; set; }
+
+        public User()
+        {
+            this.Wallets = new List<UserWallet>();
+        }
 
         public User(string name, string document, string email, string password, ETypeUser typeUser)
         {
@@ -27,9 +32,10 @@ namespace DC.PicpaySim.Domain.Entities
             this.Senha = EncryptHelper.sha256(password);
             this.CreatedAte = DateTime.Now;
             this.TypeUser = typeUser;
+            this.Wallets = new List<UserWallet>();
         }
 
-        public User(long id, Guid externalID, string name, string document, string email, string password, ETypeUser typeUser, DateTime createdAte)
+        public User(long id, Guid externalID, string name, string document, string email, string password, ETypeUser typeUser, DateTime createdAte, IList<UserWallet> wallets)
         {
             this.Id = id;
             this.ExternalId = externalID;
@@ -39,6 +45,7 @@ namespace DC.PicpaySim.Domain.Entities
             this.Senha = password;
             this.TypeUser = typeUser;
             this.CreatedAte = createdAte;
+            this.Wallets = wallets;
         }
     }
 }

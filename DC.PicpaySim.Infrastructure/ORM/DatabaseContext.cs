@@ -13,5 +13,7 @@ namespace DC.PicpaySim.Infrastructure.ORM
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
         public DbSet<User> User { get; set; }
+        public DbSet<UserWallet> UserWallet { get; set; }
+        public DbSet<Transactions> Transactions { get; set; }
     }
 }

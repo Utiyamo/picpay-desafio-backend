@@ -1,6 +1,8 @@
 using DC.PicpaySim.Application;
 using DC.PicpaySim.Application.Handlers.Auth;
+using DC.PicpaySim.Application.Handlers.Transaction;
 using DC.PicpaySim.Application.Handlers.User;
+using DC.PicpaySim.Application.Handlers.UserWallet;
 using DC.PicpaySim.Domain.Commands;
 using DC.PicpaySim.Domain.Commons;
 using DC.PicpaySim.Domain.DTO;
@@ -62,11 +64,17 @@ namespace DC.PicpaySim.API.DI
             services.AddTransient<IValidator<GetUserQuery>, GetUserQueryValidator>();
 
             services.AddTransient<IValidator<AuthUserCommand>, AuthUserValidator>();
+
+            services.AddTransient<IValidator<CreateWalletCommand>, CreateWalletCommandValidator>();
+
+            services.AddTransient<IValidator<CreateTransactionCommand>, CreateTransactionValidator>();
         }
 
         private static void AddRepositories(IServiceCollection services)
         {
             services.AddScoped<UserRepository>();
+            services.AddScoped<UserWalletRepository>();
+            services.AddScoped<TransactionRepository>();
         }
 
         private static void AddServices(IServiceCollection services)
@@ -76,6 +84,12 @@ namespace DC.PicpaySim.API.DI
             services.AddTransient<IRequestHandler<GetUserByDocumentQuery, BaseResponse<UserDTO>>, GetUserByDocumentHandler>();
 
             services.AddTransient<IRequestHandler<AuthUserCommand, BaseResponse<UserAuthDTO>>, AuthUserHandler>();
+
+            services.AddTransient<IRequestHandler<CreateWalletCommand, BaseResponse<UserWalletWithUserDTO>>, CreateUserWalletHandler>();
+            services.AddTransient<IRequestHandler<GetWalletByUserQuery, BaseResponse<UserWithWalletsDTO>>, GetWalletByUserHandler>();
+            services.AddTransient<IRequestHandler<GetWalletQuery, BaseResponse<UserWalletDTO>>, GetWalletHandler>();
+
+            services.AddTransient<IRequestHandler<CreateTransactionCommand, BaseResponse<TransactionDTO>>, CreateTransactionHandler>();
 
             services.AddTransient<IAuthenticationService, AuthenticationService>();
         }
